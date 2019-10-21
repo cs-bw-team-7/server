@@ -13,7 +13,7 @@ const auth = async (req, res, next) => {
     });
 
     // who are you?
-    if (token !== process.env.ARRON_TOKEN || token !== process.env.MEGAN_TOKEN) return res.status(400).json({
+    if (token !== process.env.ARRON_TOKEN && token !== process.env.MEGAN_TOKEN) return res.status(400).json({
       status: 'error',
       error: 'InvalidToken',
       message: 'Unfortunately the server does not know the provided token.',

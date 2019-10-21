@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 
 const logger = require('./middleware/logger');
+const auth = require('./middleware/auth');
 
 const middleware = [
   express.json(),
@@ -28,16 +29,16 @@ server.get('/init', (req, res) => {
 });
 
 // POST move
-  server.post('/move', (req, res) => {
+  server.post('/move', auth, (req, res) => {
     res.json({
-      message: 'init endpoint'
+      message: 'move endpoint'
     })
   });
   
 // POST getPath
-  server.post('/getPath', (req, res) => {
+  server.post('/getPath', auth, (req, res) => {
     res.json({
-      message: 'init endpoint'
+      message: 'getPath endpoint'
     })
   });
 
