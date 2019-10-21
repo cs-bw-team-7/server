@@ -22,7 +22,7 @@ server.get('/', (req, res) => {
 });
 
 // GET init
-server.get('/init', (req, res) => {
+server.post('/init', auth, (req, res) => {
   res.json({
     message: 'init endpoint'
   })
