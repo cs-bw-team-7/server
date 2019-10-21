@@ -1,8 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const axios = require('axios');
 
 const logger = require('./middleware/logger');
+const log = require('../utils/logger');
 const auth = require('./middleware/auth');
 
 const middleware = [
@@ -13,6 +15,8 @@ const middleware = [
 ];
 
 const server = express();
+const endpoint = 'https://lambda-treasure-hunt.herokuapp.com/api/adv';
+
 server.use(middleware);
 
 server.get('/', (req, res) => {
@@ -23,9 +27,19 @@ server.get('/', (req, res) => {
 
 // POST init
 server.post('/init', auth, async (req, res) => {
-  res.json({
-    message: 'init endpoint'
-  })
+  try {
+    const { token } = req;
+    const route = `${endpoint}/init/`;
+
+    const { data } = await axios.get(route);
+
+    res.json({
+      status: 'success',
+      data,
+    });
+  } catch (error) {
+    res.status(500).json(await log.err(error));
+  }
 });
 
 // POST move

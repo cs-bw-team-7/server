@@ -1,4 +1,5 @@
 require('dotenv').config();
+const axios = require('axios');
 
 const log = require('../../utils/logger');
 
@@ -20,6 +21,8 @@ const auth = async (req, res, next) => {
     });
 
     req.token = token;
+
+    axios.defaults.headers.common['Authorization'] = authorization;
 
     next();
   } catch (error) {
