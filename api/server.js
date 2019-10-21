@@ -20,4 +20,25 @@ server.get('/', (req, res) => {
   });
 });
 
+// GET init
+server.get('/init', (req, res) => {
+  res.json({
+    message: 'init endpoint'
+  })
+});
+
+// POST move
+  server.post('/move', (req, res) => {
+    res.json({
+      message: 'init endpoint'
+    })
+  });
+  
+// POST getPath
+  server.post('/getPath', (req, res) => {
+    res.json({
+      message: 'init endpoint'
+    })
+  });
+
 module.exports = server;
