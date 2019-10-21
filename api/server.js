@@ -21,22 +21,22 @@ server.get('/', (req, res) => {
   });
 });
 
-// GET init
-server.post('/init', auth, (req, res) => {
+// POST init
+server.post('/init', auth, async (req, res) => {
   res.json({
     message: 'init endpoint'
   })
 });
 
 // POST move
-  server.post('/move', auth, (req, res) => {
+  server.post('/move', auth, async (req, res) => {
     res.json({
       message: 'move endpoint'
     })
   });
   
 // POST getPath
-  server.post('/getPath', auth, (req, res) => {
+  server.post('/getPath', auth, async (req, res) => {
     res.json({
       message: 'getPath endpoint'
     })
