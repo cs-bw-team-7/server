@@ -1,0 +1,40 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "For your second CS Build Week, you and a small team will be competing against your fellow CS students in the ***Lambda Treasure Hunt***. To succeed, you will need to apply knowledge you've learned throughout your entire tenure at Lambda School -- CS, Labs and main track -- to efficiently traverse an island maze, collect treasure, solve puzzles, unearth powerful artifacts and more. Glory and riches await the victors!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cs-bw-team-7/server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cs-bw-team-7/server/issues"
+  },
+  "homepage": "https://github.com/cs-bw-team-7/server#readme",
+  "devDependencies": {
+    "apidoc": "^0.17.7",
+    "cross-env": "^6.0.3",
+    "jest": "^24.9.0",
+    "jest-circus": "^24.9.0",
+    "nodemon": "^1.19.4",
+    "supertest": "^4.0.2"
+  },
+  "dependencies": {
+    "axios": "^0.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "helmet": "^3.21.2",
+    "knex": "^0.19.5",
+    "knex-cleaner": "^1.3.0",
+    "pg": "^7.12.1",
+    "sqlite3": "^4.1.0",
+    "winston": "^3.2.1"
+  }
+}
