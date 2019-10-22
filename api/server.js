@@ -133,6 +133,7 @@ server.post('/move', auth, cooldownProtection, wiseExplorer, async (req, res) =>
     const {
       room_id,
       cooldown,
+      coordinates,
     } = data;
 
     // Save or Update Room Data
@@ -163,9 +164,14 @@ server.post('/move', auth, cooldownProtection, wiseExplorer, async (req, res) =>
       await Player.update(playerExists[0].id, player);
     }
 
+    const coordArray = coordsToArray(coordinates);
+
     res.json({
       status: 'success',
-      data
+      data: {
+        ...data,
+        coordinates: coordArray
+      }
     });
   } catch (error) {
     res.status(500).json(await log.err(error));
