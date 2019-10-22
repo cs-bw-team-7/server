@@ -100,6 +100,7 @@ server.post('/init', auth, cooldownProtection, async (req, res) => {
      const playerExists = await Player.getBy({ token });
    
      if (playerExists.length <= 0) {
+      const now = new Date();
       await Player.add({
         ...player,
         updated_at: now.toUTCString(),
