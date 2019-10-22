@@ -24,7 +24,7 @@ exports.up = knex => {
         .unique()
         .notNullable();
       // table.string('name');
-      table.integer('cooldown');
+      table.float('cooldown');
       // table.integer('encumbrance');
       // table.integer('strength');
       // table.integer('speed');
