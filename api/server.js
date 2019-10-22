@@ -7,6 +7,7 @@ const axios = require('axios');
 const logger = require('./middleware/logger');
 const auth = require('./middleware/auth');
 const cooldownProtection = require('./middleware/cooldownProtection');
+const wiseExplorer = require('./middleware/wiseExplorer');
 
 // Models
 const Room = require('./models/room.model');
@@ -34,54 +35,6 @@ server.get('/', (req, res) => {
     message: 'API is up and running',
   });
 });
-
-/* Init Response
-
-{
-  "room_id": 2,
-  "title": "A misty room",
-  "description": "You are standing on grass and surrounded by a dense mist. You can barely make out the exits in any direction.",
-  "coordinates": "(60,59)",
-  "elevation": 0,
-  "terrain": "NORMAL",
-  "players": [],
-  "items": [],
-  "exits": [
-    "n",
-    "s",
-    "e"
-  ],
-  "cooldown": 1.0,
-  "errors": [],
-  "messages": []
-}
-
-*/
-
-/* Move Response
-
-{
-  "room_id": 2,
-  "title": "A misty room",
-  "description": "You are standing on grass and surrounded by a dense mist. You can barely make out the exits in any direction.",
-  "coordinates": "(60,59)",
-  "elevation": 0,
-  "terrain": "NORMAL",
-  "players": [],
-  "items": [],
-  "exits": [
-    "n",
-    "s",
-    "e"
-  ],
-  "cooldown": 15.0,
-  "errors": [],
-  "messages": [
-    "You have walked south."
-  ]
-}
-
-*/
 
 const roomData = data => {
   const {
@@ -147,7 +100,10 @@ server.post('/init', auth, cooldownProtection, async (req, res) => {
      const playerExists = await Player.getBy({ token });
    
      if (playerExists.length <= 0) {
-       await Player.add(player);
+      await Player.add({
+        ...player,
+        updated_at: now.toUTCString(),
+      });
      } else {
        await Player.update(playerExists[0].id, player);
      }
@@ -167,7 +123,7 @@ server.post('/init', auth, cooldownProtection, async (req, res) => {
 });
 
 // POST move
-server.post('/move', auth, cooldownProtection, async (req, res) => {
+server.post('/move', auth, cooldownProtection, wiseExplorer, async (req, res) => {
   try {
     const route = `${endpoint}/move/`;
     const { body, token } = req;
@@ -197,7 +153,11 @@ server.post('/move', auth, cooldownProtection, async (req, res) => {
     const playerExists = await Player.getBy({ token });
     
     if (playerExists.length <= 0) {
-      await Player.add(player);
+      const now = new Date();
+      await Player.add({
+        ...player,
+        updated_at: now.toUTCString(),
+      });
     } else {
       await Player.update(playerExists[0].id, player);
     }
