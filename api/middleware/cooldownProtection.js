@@ -7,6 +7,7 @@ const cooldownProtection = async (req, res, next) => {
   if (player.length > 0) {
     player = player[0];
     const now = new Date()
+
     const updated = new Date(player.updated_at);
     const secondsPassed = (now - updated) / 1000
 

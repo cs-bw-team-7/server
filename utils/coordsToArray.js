@@ -1,6 +1,6 @@
 /*
 TODO: Future Docs
-Simple util to convert from coord string to array with x, y keys
+Simple util to convert to/from string/array
 */
 const coordsToArray = string => {
   const coordsArray = string.replace(/\(|\)/g, '').split(',');
@@ -9,5 +9,7 @@ const coordsToArray = string => {
     y: Number(coordsArray[1]),
   };
 };
+
+// TODO: Add method to convert from array to string
 
 module.exports = coordsToArray;
