@@ -125,20 +125,6 @@ server.post('/init', auth, cooldownProtection, async (req, res) => {
       coordinates,
     } = data;
 
-   const player = {
-     token,
-     cooldown,
-     room_id,
-    };
-
-    const playerExists = await Player.getBy({ token });
-  
-    if (playerExists.length <= 0) {
-      await Player.add(player);
-    } else {
-      await Player.update(playerExists[0].id, player);
-    }
-
     const coordArray = coordsToArray(coordinates);
 
     // Save or Update Room Data
@@ -151,6 +137,20 @@ server.post('/init', auth, cooldownProtection, async (req, res) => {
       // TODO: This will be required later for items (I think)
       await Room.update(room.id, room);
     }
+
+    const player = {
+      token,
+      cooldown,
+      room_id,
+     };
+ 
+     const playerExists = await Player.getBy({ token });
+   
+     if (playerExists.length <= 0) {
+       await Player.add(player);
+     } else {
+       await Player.update(playerExists[0].id, player);
+     }
 
     // TODO: Also send status request for our response
 
