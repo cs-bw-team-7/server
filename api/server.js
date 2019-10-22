@@ -122,10 +122,7 @@ server.post('/init', auth, async (req, res) => {
     // Save or Update Room Data
     const room = roomData(data);
     const exists = await Room.get(room.id);
-    console.log('\n=============\n');
-    console.log('exists', exists);
-    console.log('\n=============\n');
-    
+
     if (!exists) {
       await Room.add(room);
     } else {
@@ -137,7 +134,10 @@ server.post('/init', auth, async (req, res) => {
 
     res.json({
       status: 'success',
-      data,
+      data: {
+        ...data,
+        coordinates: coordArray,
+      },
     });
   } catch (error) {
     res.status(500).json(await log.err(error));
