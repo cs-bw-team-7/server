@@ -6,7 +6,12 @@ const axios = require('axios');
 const logger = require('./middleware/logger');
 const log = require('../utils/logger');
 const auth = require('./middleware/auth');
+
+// Models
 const Room = require('./models/room.model');
+const Player = require('./models/player.model');
+
+// Utils
 const coordsToArray = require('../utils/coordsToArray');
 const exitstoBits = require('../utils/exitsToBits');
 
@@ -109,21 +114,60 @@ server.post('/init', auth, async (req, res) => {
     const { token } = req;
     const route = `${endpoint}/init/`;
 
+    // Check player before axios for Cooldown buffer
+    const playerExists = await Player.getBy({ token: player.token });
+
+    if (playerExists.length > 0) {
+      // check cooldown
+    }
+
     const { data } = await axios.get(route);
 
     const {
       cooldown,
       items,
+      room_id,
       coordinates,
     } = data;
+
+    /*
+    table.increments();
+      table.string('token')
+        .unique()
+        .notNullable();
+      // table.string('name');
+      table.integer('cooldown');
+      // table.integer('encumbrance');
+      // table.integer('strength');
+      // table.integer('speed');
+      // table.integer('gold');
+      table.integer('room_id')
+        .references('id')
+        .inTable('room')
+        .onDelete('RESTRICT')
+        .onUpdate('CASCADE')
+    });
+    */
+
+    const player = {
+      token,
+      cooldown,
+      room_id,
+    };
+  
+    if (playerExists.length <= 0) {
+      await Player.add(player);
+    } else {
+      await Player.update(playerExists[0].id, player);
+    }
 
     const coordArray = coordsToArray(coordinates);
 
     // Save or Update Room Data
     const room = roomData(data);
-    const exists = await Room.get(room.id);
+    const roomExists = await Room.get(room.id);
 
-    if (!exists) {
+    if (!roomExists) {
       await Room.add(room);
     } else {
       // TODO: This will be required later for items (I think)
@@ -148,7 +192,7 @@ server.post('/init', auth, async (req, res) => {
 server.post('/move', auth, async (req, res) => {
   try {
     const route = `${endpoint}/move/`;
-    const { body } = req;
+    const { body, token } = req;
     const { data } = await axios.post(route, body);
 
     // Save or Update Room Data
