@@ -44,9 +44,14 @@ server.post('/init', auth, async (req, res) => {
 
 // POST move
   server.post('/move', auth, async (req, res) => {
+    const route = `${endpoint}/move/`;
+    const { body } = req;
+    const { data } = await axios.post(route, body);
+
     res.json({
-      message: 'move endpoint'
-    })
+      status: 'success',
+      data
+    });
   });
   
 // POST getPath
