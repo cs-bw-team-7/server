@@ -125,26 +125,6 @@ server.post('/init', auth, cooldownProtection, async (req, res) => {
       coordinates,
     } = data;
 
-    /*
-    table.increments();
-      table.string('token')
-        .unique()
-        .notNullable();
-      // table.string('name');
-      table.integer('cooldown');
-      // table.integer('encumbrance');
-      // table.integer('strength');
-      // table.integer('speed');
-      // table.integer('gold');
-      table.integer('room_id')
-        .references('id')
-        .inTable('room')
-        .onDelete('RESTRICT')
-        .onUpdate('CASCADE')
-    });
-    */
-
-   
    const player = {
      token,
      cooldown,
@@ -193,17 +173,33 @@ server.post('/move', auth, cooldownProtection, async (req, res) => {
     const { body, token } = req;
 
     const { data } = await axios.post(route, body);
-
-    const playerExists = await Player.getBy({ token });
+    const {
+      room_id,
+      cooldown,
+    } = data;
 
     // Save or Update Room Data
     const room = roomData(data);
     const exists = await Room.get(room.id);
-
+    
     if (!exists) {
       await Room.add(room);
     } else {
       await Room.update(room.id, room);
+    }
+
+    const player = {
+      token,
+      cooldown,
+      room_id,
+    };
+
+    const playerExists = await Player.getBy({ token });
+    
+    if (playerExists.length <= 0) {
+      await Player.add(player);
+    } else {
+      await Player.update(playerExists[0].id, player);
     }
 
     res.json({
@@ -218,8 +214,8 @@ server.post('/move', auth, cooldownProtection, async (req, res) => {
 // POST getPath
 server.post('/getPath', auth, async (req, res) => {
   res.json({
-    message: 'getPath endpoint'
-  })
+    message: 'getPath endpoint not implemented yet',
+  });
 });
 
 // TEMP GET rooms
