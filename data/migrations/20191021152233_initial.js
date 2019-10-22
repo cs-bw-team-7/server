@@ -22,12 +22,15 @@ exports.up = knex => {
       table.integer('elevation');
       table.string('terrain');
       table.string('coordinates');
+      table.integer('exits');
+      table.timestamps(true, true);
     })
     .createTable('treasure', table => {
       table.increments();
       table.string('name')
-        .unique()
-        .notNullable();
+      .unique()
+      .notNullable();
+      table.timestamps(true, true);
     })
     .createTable('room_treasure', table => {
       table.integer('room_id')

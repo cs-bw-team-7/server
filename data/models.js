@@ -9,8 +9,8 @@ module.exports = table => ({
   cb,
 });
 
-const get = table => id => {
-  if (!id) return db(table);
+const get = table => (id=false) => {
+  if (id === false) return db(table);
   return db(table).where({ id }).first();
 }
 
