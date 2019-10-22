@@ -33,6 +33,8 @@ server.post('/init', auth, async (req, res) => {
 
     const { data } = await axios.get(route);
 
+    // Save or Update Room Data
+
     res.json({
       status: 'success',
       data,
@@ -47,6 +49,8 @@ server.post('/init', auth, async (req, res) => {
     const route = `${endpoint}/move/`;
     const { body } = req;
     const { data } = await axios.post(route, body);
+
+    // Save or Update Room Data
 
     res.json({
       status: 'success',
