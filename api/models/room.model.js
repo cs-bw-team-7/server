@@ -15,7 +15,4 @@ const db = require('../../data/models')('room');
 //   });
 // };
 
-module.exports = {
-  ...db,
-  // getsubject,
-};
+module.exports = db;

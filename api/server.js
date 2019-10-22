@@ -6,6 +6,9 @@ const axios = require('axios');
 const logger = require('./middleware/logger');
 const log = require('../utils/logger');
 const auth = require('./middleware/auth');
+const Room = require('./models/room.model');
+const coordsToArray = require('../utils/coordsToArray');
+const exitstoBits = require('../utils/exitsToBits');
 
 const middleware = [
   express.json(),
@@ -73,6 +76,33 @@ server.get('/', (req, res) => {
 
 */
 
+const roomData = data => {
+  const {
+    room_id: id,
+    title,
+    description,
+    coordinates,
+    terrain,
+    elevation,
+    exits,
+  } = data;
+
+  
+  const exitBits = exitstoBits(exits);
+
+  const room = {
+    id,
+    title,
+    description,
+    coordinates,
+    terrain,
+    elevation,
+    exits: exitBits,
+  };
+
+  return room;
+};
+
 // POST init
 server.post('/init', auth, async (req, res) => {
   try {
@@ -81,7 +111,27 @@ server.post('/init', auth, async (req, res) => {
 
     const { data } = await axios.get(route);
 
+    const {
+      cooldown,
+      items,
+      coordinates,
+    } = data;
+
+    const coordArray = coordsToArray(coordinates);
+
     // Save or Update Room Data
+    const room = roomData(data);
+    const exists = await Room.get(room.id);
+    console.log('\n=============\n');
+    console.log('exists', exists);
+    console.log('\n=============\n');
+    
+    if (!exists) {
+      await Room.add(room);
+    } else {
+      // TODO: This will be required later for items (I think)
+      await Room.update(room.id, room);
+    }
 
     // TODO: Also send status request for our response
 
@@ -95,12 +145,21 @@ server.post('/init', auth, async (req, res) => {
 });
 
 // POST move
-  server.post('/move', auth, async (req, res) => {
+server.post('/move', auth, async (req, res) => {
+  try {
     const route = `${endpoint}/move/`;
     const { body } = req;
     const { data } = await axios.post(route, body);
 
     // Save or Update Room Data
+    const room = roomData(data);
+    const exists = await Room.get(room.id);
+
+    if (!exists) {
+      await Room.add(room);
+    } else {
+      await Room.update(room.id, room);
+    }
 
     // TODO: Cooldown management (prevent increased CDs by tracking on our end)
 
@@ -108,13 +167,29 @@ server.post('/init', auth, async (req, res) => {
       status: 'success',
       data
     });
-  });
+  } catch (error) {
+    res.status(500).json(await log.err(error));
+  }
+});
   
 // POST getPath
-  server.post('/getPath', auth, async (req, res) => {
+server.post('/getPath', auth, async (req, res) => {
+  res.json({
+    message: 'getPath endpoint'
+  })
+});
+
+// TEMP GET rooms
+server.get('/rooms', async (req, res) => {
+  try {
+    const rooms = await Room.get();
     res.json({
-      message: 'getPath endpoint'
-    })
-  });
+      status: 'success',
+      rooms
+    });
+  } catch (error) {
+    res.status(500).json(await log.err(error));
+  }
+})
 
 module.exports = server;
