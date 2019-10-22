@@ -22,6 +22,7 @@ exports.up = knex => {
       table.integer('elevation');
       table.string('terrain');
       table.string('coordinates');
+      table.integer('exits');
       table.timestamps(true, true);
     })
     .createTable('treasure', table => {
