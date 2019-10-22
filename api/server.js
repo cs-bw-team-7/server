@@ -3,15 +3,17 @@ const cors = require('cors');
 const helmet = require('helmet');
 const axios = require('axios');
 
+// middleware
 const logger = require('./middleware/logger');
-const log = require('../utils/logger');
 const auth = require('./middleware/auth');
+const cooldownProtection = require('./middleware/cooldownProtection');
 
 // Models
 const Room = require('./models/room.model');
 const Player = require('./models/player.model');
 
 // Utils
+const log = require('../utils/logger');
 const coordsToArray = require('../utils/coordsToArray');
 const exitstoBits = require('../utils/exitsToBits');
 
@@ -109,17 +111,10 @@ const roomData = data => {
 };
 
 // POST init
-server.post('/init', auth, async (req, res) => {
+server.post('/init', auth, cooldownProtection, async (req, res) => {
   try {
     const { token } = req;
     const route = `${endpoint}/init/`;
-
-    // Check player before axios for Cooldown buffer
-    const playerExists = await Player.getBy({ token: player.token });
-
-    if (playerExists.length > 0) {
-      // check cooldown
-    }
 
     const { data } = await axios.get(route);
 
@@ -149,11 +144,14 @@ server.post('/init', auth, async (req, res) => {
     });
     */
 
-    const player = {
-      token,
-      cooldown,
-      room_id,
+   
+   const player = {
+     token,
+     cooldown,
+     room_id,
     };
+
+    const playerExists = await Player.getBy({ token });
   
     if (playerExists.length <= 0) {
       await Player.add(player);
@@ -189,11 +187,14 @@ server.post('/init', auth, async (req, res) => {
 });
 
 // POST move
-server.post('/move', auth, async (req, res) => {
+server.post('/move', auth, cooldownProtection, async (req, res) => {
   try {
     const route = `${endpoint}/move/`;
     const { body, token } = req;
+
     const { data } = await axios.post(route, body);
+
+    const playerExists = await Player.getBy({ token });
 
     // Save or Update Room Data
     const room = roomData(data);
@@ -204,8 +205,6 @@ server.post('/move', auth, async (req, res) => {
     } else {
       await Room.update(room.id, room);
     }
-
-    // TODO: Cooldown management (prevent increased CDs by tracking on our end)
 
     res.json({
       status: 'success',

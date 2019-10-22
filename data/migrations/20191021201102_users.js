@@ -29,6 +29,7 @@ exports.up = knex => {
       // table.integer('strength');
       // table.integer('speed');
       // table.integer('gold');
+      table.timestamps(true, true);
       table.integer('room_id')
         .references('id')
         .inTable('room')
