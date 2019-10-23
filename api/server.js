@@ -265,7 +265,7 @@ server.post('/getPath', auth, async (req, res) => {
   try {
     const { token, body } = req;
     const playerExists = await Player.getBy({ token });
-    let path = [];
+    let travelPath = [];
 
     if (playerExists.length <= 0) return res.status(400).json({
       status: 'error',
@@ -318,9 +318,11 @@ server.post('/getPath', auth, async (req, res) => {
       const next_room = queue.shift(); // { coords: {x: 60, y: 60}, path: ['n', 's']}
       const current_room = map[next_room.coords.y][next_room.coords.x];
       const current_path = next_room.path;
+      console.log(current_room.id, current_path);
 
       if (current_room.id == destinationId) {
-        path = next_room.path;
+        console.log('breaking', current_path);
+        travelPath = current_path;
         break;
       }
 
@@ -361,7 +363,7 @@ server.post('/getPath', auth, async (req, res) => {
       location: location.coordinates,
       destinationId,
       t: body.destination,
-      path,
+      travelPath,
       map,
     });
   } catch (error) {
