@@ -178,12 +178,212 @@ server.post('/move', auth, cooldownProtection, wiseExplorer, async (req, res) =>
     res.status(500).json(await log.err(error));
   }
 });
-  
+
+server.locals.Room = (room) => {
+  const directions = ["w", "s", "e", "n"]
+  const exits = [];
+  const coordinates = {
+    x: Number(room.coordinates.replace(/\(|\)/g, '').split(',')[0]),
+    y: Number(room.coordinates.replace(/\(|\)/g, '').split(',')[1]),
+  };
+
+  for (let i = 0; i < 4; i++) {
+    const direction = (room.exits >> i) & 1;
+    if (direction) {
+      exits.push(directions[i]);
+    }
+  }
+
+  const neighbors = [];
+
+  exits.forEach(exit => {
+    const neighbor = {}
+    switch (exit) {
+      case "n":
+        neighbor.direction = "n";
+        neighbor.coordinates = {
+          x: coordinates.x,
+          y: coordinates.y + 1
+        }
+        break;
+      case "e":
+        neighbor.direction = "e";
+        neighbor.coordinates = {
+          x: coordinates.x + 1,
+          y: coordinates.y
+        }
+        break;
+      case "s":
+        neighbor.direction = "s";
+        neighbor.coordinates = {
+          x: coordinates.x,
+          y: coordinates.y - 1
+        }
+        break;
+      case "w":
+        neighbor.direction = "w";
+        neighbor.coordinates = {
+          x: coordinates.x - 1,
+          y: coordinates.y
+        }
+        break;
+      default:
+        break;
+    }
+    neighbors.push(neighbor);
+  });
+
+  return {
+    ...room,
+    exits,
+    coordinates,
+    neighbors
+  }
+}
+
+server.locals.Map = (rooms) => {
+  // return a map array with rooms at map[y][x]
+  // 100 x 100 room
+  const map = Array(100);
+  for (let i = 0; i < map.length; i++) {
+    map[i] = Array(100);
+  }
+
+  rooms.forEach(room => {
+    map[room.coordinates.y][room.coordinates.x] = room
+  });
+
+  return map;
+}
+
+// next_room = queue.shift()
+// current_room = map[next_room.y][next_room.x]
+// current_path = previous_room.path + next_room.direction
+
 // POST getPath
 server.post('/getPath', auth, async (req, res) => {
-  res.json({
-    message: 'getPath endpoint not implemented yet',
-  });
+  try {
+    const { token, body } = req;
+    const playerExists = await Player.getBy({ token });
+    let path = [];
+
+    if (playerExists.length <= 0) return res.status(400).json({
+      status: 'error',
+      message: 'Who are you? Invalid token.',
+    });
+
+    const player = playerExists[0];
+    // start location
+    let location = await Room.get(0); // TODO: Update room id to be player['room_id']
+    location = location.coordinates;
+
+    const destination = body.destination ? body.destination : '(60, 60)'; // default to start room
+
+    // Start will be current location
+    // Get target coords off body
+
+    const roomData = await Room.get()
+    const rooms = [];
+    roomData.forEach(room => {
+      rooms.push(req.app.locals.Room(room));
+    });
+
+    const map = req.app.locals.Map(rooms);
+
+    const destCoords = {
+      x: Number(destination.replace(/\(|\)/g, '').split(',')[0]),
+      y: Number(destination.replace(/\(|\)/g, '').split(',')[1])
+    }
+    const destRoom = map[destCoords.y][destCoords.x];
+    const destinationId = destRoom.id;
+
+    // Get all rooms
+    // loop over each room, storing it as Room
+    // Loop over all Rooms doing BFT Traversal
+
+    // TODO: Can update this to a proper queue later if there is time
+    const queue = [];  // For now queue.shift and queue.push
+    const tracked = {};
+    const visited = {};
+
+    queue.push({
+      coords: {
+        x: Number(location.replace(/\(|\)/g, '').split(',')[0]),
+        y: Number(location.replace(/\(|\)/g, '').split(',')[1])
+      },
+      path: [],
+    });
+
+    while (queue.length > 0) {
+      const next_room = queue.shift(); // { coords: {x: 60, y: 60}, path: ['n', 's']}
+      const current_room = map[next_room.coords.y][next_room.coords.x];
+      const current_path = next_room.path;
+
+      if (current_room.id == destinationId) {
+        path = next_room.path;
+        break;
+      }
+
+      const coordString = `(${current_room.coordinates.x},${current_room.coordinates.y})`;
+
+      if (visited[coordString]) {
+        continue;
+      }
+
+      // visited['(x,y)'] = {...current_room, current_path}
+      visited[coordString] = {...current_room, current_path};
+
+      /*
+      "neighbors": [
+          {
+            "direction": "w",
+            "coordinates": {
+              "x": 59,
+              "y": 60
+            }
+          },
+      */
+      current_room.neighbors.forEach(neighbor => {
+        const coordString = `(${neighbor.coordinates.x},${neighbor.coordinates.y})`;
+        if (!tracked[coordString]) {
+          queue.push({
+            coords: neighbor.coordinates,
+            path: [...current_path, neighbor.direction],
+          });
+          tracked[coordString] = true;
+        }
+      });
+    }
+
+    res.json({
+      message: 'getPath endpoint not implemented yet',
+      roomId: player['room_id'],
+      location: location.coordinates,
+      path,
+      map,
+    });
+  } catch (error) {
+    res.status(500).json(await log.err(error));
+  }
+});
+
+server.post('/map', auth, async (req, res) => {
+  try {
+    const rooms = await Room.get();
+
+    res.json({
+      status: 'success',
+      rooms: rooms.map(room => ({
+        ...room,
+        coordinates: {
+          x: room.coordinates.replace(/\(|\)/g, '').split(',')[0],
+          y: room.coordinates.replace(/\(|\)/g, '').split(',')[1]
+        }
+      }))
+    })
+  } catch (error) {
+    res.status(500).json(await log.err(error));
+  }
 });
 
 // TEMP GET rooms
