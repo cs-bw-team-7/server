@@ -359,6 +359,8 @@ server.post('/getPath', auth, async (req, res) => {
       message: 'getPath endpoint not implemented yet',
       roomId: player['room_id'],
       location: location.coordinates,
+      destinationId,
+      t: body.destination,
       path,
       map,
     });
