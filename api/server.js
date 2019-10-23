@@ -178,12 +178,102 @@ server.post('/move', auth, cooldownProtection, wiseExplorer, async (req, res) =>
     res.status(500).json(await log.err(error));
   }
 });
-  
+
+server.locals.Room = (room) => {
+  const directions = ["w", "s", "e", "n"]
+  const exits = [];
+  const coordinates = {
+    x: Number(room.coordinates.replace(/\(|\)/g, '').split(',')[0]),
+    y: Number(room.coordinates.replace(/\(|\)/g, '').split(',')[1]),
+  };
+
+  for (let i = 0; i < 4; i++) {
+    const direction = (room.exits >> i) & 1;
+    if (direction) {
+      exits.push(directions[i]);
+    }
+  }
+
+  const neighbors = [];
+
+  exits.forEach(exit => {
+    const neighbor = {}
+    switch (exit) {
+      case "n":
+        neighbor.direction = "n";
+        neighbor.coordinates = {
+          x: coordinates.x,
+          y: coordinates.y + 1
+        }
+        break;
+      case "e":
+        neighbor.direction = "e";
+        neighbor.coordinates = {
+          x: coordinates.x + 1,
+          y: coordinates.y
+        }
+        break;
+      case "s":
+        neighbor.direction = "s";
+        neighbor.coordinates = {
+          x: coordinates.x,
+          y: coordinates.y - 1
+        }
+        break;
+      case "w":
+        neighbor.direction = "w";
+        neighbor.coordinates = {
+          x: coordinates.x - 1,
+          y: coordinates.y
+        }
+        break;
+      default:
+        break;
+    }
+    neighbors.push(neighbor);
+  });
+
+  return {
+    ...room,
+    exits,
+    coordinates,
+    neighbors
+  }
+}
+
+server.locals.Map = (rooms) => {
+  // return a map array with rooms at map[y][x]
+  // 100 x 100 room
+}
+
+// next_room = queue.shift()
+// current_room = map[next_room.y][next_room.x]
+// current_path = previous_room.path + next_room.direction
+
 // POST getPath
 server.post('/getPath', auth, async (req, res) => {
-  res.json({
-    message: 'getPath endpoint not implemented yet',
-  });
+  try {
+    // Start will be current location
+    // Get target coords off body
+    const roomData = await Room.get()
+    rooms = {};
+    roomData.forEach(room => {
+      rooms[room.coordinates] = req.app.locals.Room(room);
+    });
+    // const { answer } = req.app.locals
+
+    // Get all rooms
+    // loop over each room, storing it as Room
+    // Loop over all Rooms doing BFT Traversal
+
+    res.json({
+      message: 'getPath endpoint not implemented yet',
+      rooms,
+      // answer,
+    });
+  } catch (error) {
+    res.status(500).json(await log.err(error));
+  }
 });
 
 server.post('/map', auth, async (req, res) => {
@@ -201,7 +291,7 @@ server.post('/map', auth, async (req, res) => {
       }))
     })
   } catch (error) {
-    
+    res.status(500).json(await log.err(error));
   }
 });
 
