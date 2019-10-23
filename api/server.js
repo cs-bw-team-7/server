@@ -414,6 +414,7 @@ server.post('/roomids', auth, async (req, res) => {
     });
 
     currentRoom = await Room.get(player[0].room_id)
+    console.log(currentRoom)
     
     res.json({
       status: 'success',
