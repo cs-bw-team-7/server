@@ -274,7 +274,7 @@ server.post('/getPath', auth, async (req, res) => {
 
     const player = playerExists[0];
     // start location
-    let location = await Room.get(0); // TODO: Update room id to be player['room_id']
+    let location = await Room.get(player['room_id']);
     location = location.coordinates;
 
     const destination = body.destination ? body.destination : '(60, 60)'; // default to start room
