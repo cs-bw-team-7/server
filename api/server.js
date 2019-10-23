@@ -421,8 +421,10 @@ server.post('/roomids', auth, async (req, res) => {
     res.json({
       status: 'success',
       coordinates: {
-        x: Number(currentRoom.coordinates.replace(/\(|\)/g, '').split(',')[0]),
-        y: Number(currentRoom.coordinates.replace(/\(|\)/g, '').split(',')[1]),
+        // x: Number(currentRoom.coordinates.replace(/\(|\)/g, '').split(',')[0]),
+        // y: Number(currentRoom.coordinates.replace(/\(|\)/g, '').split(',')[1]),
+        x: 61,
+        y: 61,
       },
       ids,
     });
