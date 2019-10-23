@@ -386,6 +386,35 @@ server.get('/rooms', async (req, res) => {
   }
 });
 
+server.post('/roomids', async (req, res) => {
+  try {
+    const { body } = req;
+    const ids = [];
+    const roomPromises = [];
+
+    body.coords.forEach(coordinates => {
+      roomPromises.push(Room.getBy({ coordinates }));
+    });
+
+    const rooms = await Promise.all(roomPromises);
+
+    rooms.forEach(room => {
+      if (room.length === 0) return res.status(404).json({
+        status: 'error',
+        message: 'Room coords not found.',
+      });
+      ids.push(room[0].id)
+    })
+
+    res.json({
+      status: 'success',
+      ids,
+    });
+  } catch (error) {
+    res.status(500).json(await log.err(error));
+  }
+})
+
 server.post('/update', auth, async (req, res) => {
   try {
     const { token, body } = req;
