@@ -392,20 +392,6 @@ server.post('/roomids', auth, async (req, res) => {
     const ids = [];
     const roomPromises = [];
 
-    body.coords.forEach(coordinates => {
-      roomPromises.push(Room.getBy({ coordinates }));
-    });
-
-    const rooms = await Promise.all(roomPromises);
-
-    rooms.forEach(room => {
-      if (room.length === 0) return res.status(404).json({
-        status: 'error',
-        message: 'Room coords not found.',
-      });
-      ids.push(room[0].id)
-    });
-
     const player = await Player.getBy({ token });
 
     if (player.length <= 0) return res.status(400).json({
@@ -416,7 +402,22 @@ server.post('/roomids', auth, async (req, res) => {
     currentRoom = await Room.get(player[0]['room_id'])
     console.log(player[0])
     console.log(currentRoom)
-    
+
+    body.coords.forEach(coordinates => {
+      roomPromises.push(Room.getBy({ coordinates }));
+    });
+
+    const rooms = await Promise.all(roomPromises);
+
+
+    rooms.forEach(room => {
+      if (room.length === 0) return res.status(404).json({
+        status: 'error',
+        message: 'Room coords not found.',
+      });
+      ids.push(room[0].id)
+    });
+
     res.json({
       status: 'success',
       coordinates: {
