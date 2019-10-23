@@ -196,6 +196,23 @@ server.get('/rooms', async (req, res) => {
   } catch (error) {
     res.status(500).json(await log.err(error));
   }
+});
+
+server.post('/update', auth, async (req, res) => {
+  try {
+    const { token, body } = req;
+ 
+    const playerExists = await Player.getBy({ token });
+
+    if (playerExists.length > 0) {
+      await Player.update(playerExists[0].id, {...playerExists[0], cooldown: body.cooldown});
+    }
+
+    res.json({message: 'success'})
+
+  } catch (error) {
+    res.status(500).json(await log.err(error));
+  }
 })
 
 module.exports = server;
