@@ -174,7 +174,6 @@ server.post('/move', auth, cooldownProtection, wiseExplorer, async (req, res) =>
       }
     });
   } catch (error) {
-    console.log(error.response)
     res.status(500).json(await log.err(error));
   }
 });
@@ -394,14 +393,13 @@ server.post('/roomids', auth, async (req, res) => {
 
     const player = await Player.getBy({ token });
 
+    // TODO: This or auth doesn't appear to be working correctly on postgres
     if (player.length <= 0) return res.status(400).json({
       status: 'error',
       message: 'Who are you? Invalid token.',
     });
 
     currentRoom = await Room.get(player[0]['room_id'])
-    console.log(player[0])
-    console.log(currentRoom)
 
     body.coords.forEach(coordinates => {
       roomPromises.push(Room.getBy({ coordinates }));
@@ -421,10 +419,8 @@ server.post('/roomids', auth, async (req, res) => {
     res.json({
       status: 'success',
       coordinates: {
-        // x: Number(currentRoom.coordinates.replace(/\(|\)/g, '').split(',')[0]),
-        // y: Number(currentRoom.coordinates.replace(/\(|\)/g, '').split(',')[1]),
-        x: 61,
-        y: 61,
+        x: Number(currentRoom.coordinates.replace(/\(|\)/g, '').split(',')[0]),
+        y: Number(currentRoom.coordinates.replace(/\(|\)/g, '').split(',')[1]),
       },
       ids,
     });
