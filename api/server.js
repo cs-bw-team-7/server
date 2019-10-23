@@ -386,9 +386,9 @@ server.get('/rooms', async (req, res) => {
   }
 });
 
-server.post('/roomids', async (req, res) => {
+server.post('/roomids', auth, async (req, res) => {
   try {
-    const { body } = req;
+    const { token, body } = req;
     const ids = [];
     const roomPromises = [];
 
@@ -404,10 +404,23 @@ server.post('/roomids', async (req, res) => {
         message: 'Room coords not found.',
       });
       ids.push(room[0].id)
-    })
+    });
 
+    const player = await Player.getBy({ token });
+
+    if (player.length <= 0) return res.status(400).json({
+      status: 'error',
+      message: 'Who are you? Invalid token.',
+    });
+
+    currentRoom = await Room.get(player[0].room_id)
+    
     res.json({
       status: 'success',
+      coordinates: {
+        x: Number(currentRoom.coordinates.replace(/\(|\)/g, '').split(',')[0]),
+        y: Number(currentRoom.coordinates.replace(/\(|\)/g, '').split(',')[1]),
+      },
       ids,
     });
   } catch (error) {
