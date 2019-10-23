@@ -186,6 +186,25 @@ server.post('/getPath', auth, async (req, res) => {
   });
 });
 
+server.post('/map', auth, async (req, res) => {
+  try {
+    const rooms = await Room.get();
+
+    res.json({
+      status: 'success',
+      rooms: rooms.map(room => ({
+        ...room,
+        coordinates: {
+          x: room.coordinates.replace(/\(|\)/g, '').split(',')[0],
+          y: room.coordinates.replace(/\(|\)/g, '').split(',')[1]
+        }
+      }))
+    })
+  } catch (error) {
+    
+  }
+});
+
 // TEMP GET rooms
 server.get('/rooms', async (req, res) => {
   try {
