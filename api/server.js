@@ -265,7 +265,7 @@ server.post('/getPath', auth, async (req, res) => {
   try {
     const { token, body } = req;
     const playerExists = await Player.getBy({ token });
-    let travelPath = [];
+    let path = [];
 
     if (playerExists.length <= 0) return res.status(400).json({
       status: 'error',
@@ -318,11 +318,9 @@ server.post('/getPath', auth, async (req, res) => {
       const next_room = queue.shift(); // { coords: {x: 60, y: 60}, path: ['n', 's']}
       const current_room = map[next_room.coords.y][next_room.coords.x];
       const current_path = next_room.path;
-      console.log(current_room.id, current_path);
 
       if (current_room.id == destinationId) {
-        console.log('breaking', current_path);
-        travelPath = current_path;
+        path = current_path;
         break;
       }
 
@@ -335,16 +333,6 @@ server.post('/getPath', auth, async (req, res) => {
       // visited['(x,y)'] = {...current_room, current_path}
       visited[coordString] = {...current_room, current_path};
 
-      /*
-      "neighbors": [
-          {
-            "direction": "w",
-            "coordinates": {
-              "x": 59,
-              "y": 60
-            }
-          },
-      */
       current_room.neighbors.forEach(neighbor => {
         const coordString = `(${neighbor.coordinates.x},${neighbor.coordinates.y})`;
         if (!tracked[coordString]) {
@@ -358,13 +346,8 @@ server.post('/getPath', auth, async (req, res) => {
     }
 
     res.json({
-      message: 'getPath endpoint not implemented yet',
-      roomId: player['room_id'],
-      location: location.coordinates,
-      destinationId,
-      t: body.destination,
-      travelPath,
-      map,
+      status: 'success',
+      path,
     });
   } catch (error) {
     res.status(500).json(await log.err(error));
