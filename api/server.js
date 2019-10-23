@@ -413,7 +413,8 @@ server.post('/roomids', auth, async (req, res) => {
       message: 'Who are you? Invalid token.',
     });
 
-    currentRoom = await Room.get(player[0].room_id)
+    currentRoom = await Room.get(player[0]['room_id'])
+    console.log(player[0])
     console.log(currentRoom)
     
     res.json({
