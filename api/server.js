@@ -174,6 +174,7 @@ server.post('/move', auth, cooldownProtection, wiseExplorer, async (req, res) =>
       }
     });
   } catch (error) {
+    console.log(error.response)
     res.status(500).json(await log.err(error));
   }
 });
