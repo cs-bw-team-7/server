@@ -305,11 +305,13 @@ server.post('/getPath', auth, async (req, res) => {
     const tracked = {};
     const visited = {};
 
+    const current = {
+      x: Number(location.replace(/\(|\)/g, '').split(',')[0]),
+      y: Number(location.replace(/\(|\)/g, '').split(',')[1])
+    }
+
     queue.push({
-      coords: {
-        x: Number(location.replace(/\(|\)/g, '').split(',')[0]),
-        y: Number(location.replace(/\(|\)/g, '').split(',')[1])
-      },
+      coords: current,
       path: [],
     });
 
@@ -346,6 +348,7 @@ server.post('/getPath', auth, async (req, res) => {
 
     res.json({
       status: 'success',
+      coordinates: current,
       path,
     });
   } catch (error) {
