@@ -486,7 +486,28 @@ server.post('/roomids', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json(await log.err(error));
   }
-})
+});
+
+server.get('/room', async (req, res) => {
+  try {
+    const { body: { id } } = req;
+
+    const room = await Room.get(id)
+
+    if (!room) return res.status(404).json({
+      status: 'error',
+      message: 'Could not find the room.',
+    });
+
+    res.json({
+      status: 'success',
+      coordinates: room['coordinates']  // should be string coords '(x,y)'
+    })
+  } catch (error) {
+    console.log(error.response.data)
+    res.status(500).json(await log.err(error));
+  }
+});
 
 server.post('/update', auth, async (req, res) => {
   try {
