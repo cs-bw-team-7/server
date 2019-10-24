@@ -183,7 +183,7 @@ server.post('/dash', auth, cooldownProtection, async (req, res) => {
   try {
     const route = `${endpoint}/dash/`;
     const { body, token } = req;
-
+    console.log(body)
     const { data } = await axios.post(route, body);
     const {
       room_id,
