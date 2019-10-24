@@ -178,6 +178,61 @@ server.post('/move', auth, cooldownProtection, wiseExplorer, async (req, res) =>
   }
 });
 
+// POST dash
+server.post('/dash', auth, cooldownProtection, async (req, res) => {
+  try {
+    const route = `${endpoint}/dash/`;
+    const { body, token } = req;
+
+    const { data } = await axios.post(route, body);
+    const {
+      room_id,
+      cooldown,
+      coordinates,
+    } = data;
+
+    // Save or Update Room Data
+    const room = roomData(data);
+    const exists = await Room.get(room.id);
+    
+    if (!exists) {
+      await Room.add(room);
+    } else {
+      await Room.update(room.id, room);
+    }
+
+    const player = {
+      token,
+      cooldown,
+      room_id,
+    };
+
+    const playerExists = await Player.getBy({ token });
+    
+    if (playerExists.length <= 0) {
+      const now = new Date();
+      await Player.add({
+        ...player,
+        updated_at: now.toUTCString(),
+      });
+    } else {
+      await Player.update(playerExists[0].id, player);
+    }
+
+    const coordArray = coordsToArray(coordinates);
+
+    res.json({
+      status: 'success',
+      data: {
+        ...data,
+        coordinates: coordArray
+      }
+    });
+  } catch (error) {
+    res.status(500).json(await log.err(error));
+  }
+});
+
 server.locals.Room = (room) => {
   const directions = ["w", "s", "e", "n"]
   const exits = [];
