@@ -229,6 +229,7 @@ server.post('/dash', auth, cooldownProtection, async (req, res) => {
       }
     });
   } catch (error) {
+    console.log('dash error', error.response)
     res.status(500).json(await log.err(error));
   }
 });
