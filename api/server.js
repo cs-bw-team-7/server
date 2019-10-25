@@ -471,14 +471,26 @@ server.post('/map', auth, async (req, res) => {
   try {
     const rooms = await Room.get();
 
+    const { token } = req;
+    const playerExists = await Player.getBy({ token });
+
+    if (playerExists.length <= 0) res.status(401).json({
+      status: 'error',
+      message: 'Who are you? Invalid token.',
+    });
+
+    const player = playerExists[0];
+
     res.json({
       status: 'success',
       rooms: rooms.map(room => ({
         ...room,
         coordinates: {
           x: room.coordinates.replace(/\(|\)/g, '').split(',')[0],
-          y: room.coordinates.replace(/\(|\)/g, '').split(',')[1]
-        }
+          y: room.coordinates.replace(/\(|\)/g, '').split(',')[1],
+          d: 't'
+        },
+        here: player.room_id === room.id
       }))
     })
   } catch (error) {
@@ -560,6 +572,28 @@ server.get('/room', async (req, res) => {
     })
   } catch (error) {
     console.log(error.response.data)
+    res.status(500).json(await log.err(error));
+  }
+});
+
+server.post('/validate', auth, async (req, res) => {
+  try {
+    const { token } = req;
+    const playerExists = await Player.getBy({ token });
+
+    if (playerExists.length <= 0) res.status(401).json({
+      status: 'error',
+      message: 'Who are you? Invalid token.',
+    })
+
+    const player = playerExists[0]
+
+    res.json({
+      status: 'success',
+      message: 'Welcome!'
+    })
+  } catch (error) {
+    console.log(error)
     res.status(500).json(await log.err(error));
   }
 });
